@@ -40,8 +40,12 @@ e.g
 | Argument | Description |
 |--|--|
 | -h, --help| Path of the executable |
+| -l LIMIT, --limit LIMIT|Only display the n first 4-bits sequences of the code section. n = 0 displays all sequences. e.g : -l n|
 | -sc ***START_COLOR***, --start-color ***START_COLOR***| Start color of gradient in HEX or RGB 255-tuple. e.g :'#42b0f4' or '(18,255,156)' |
 |-ec ***END_COLOR***, --end-color ***END_COLOR***| End color of gradient in HEX or RGB 255-tuple. e.g :'#42b0f4' or '(18,255,156)' |
 | -om ***OMIT*** [***OMIT*** ...], --omit ***OMIT*** [***OMIT*** ...]| List of hex values to omit during the computation of the graphical visualization. One value between 0x0 and 0xf at a time. e.g : 0x1 0xa 0xe|
 |-nl, --no-legend| Disable legend display. |
 |-s, --silent| Disable all output messages. |
+
+
+Omitting zeros can be useful in order to have a more unique visualization: as code section tends to contain many zeros, the graphical representation may rapidly look like a single straight line. 

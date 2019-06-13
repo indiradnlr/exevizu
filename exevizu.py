@@ -1,3 +1,13 @@
+
+#!/usr/bin/env python
+
+"""
+Exevizu
+@author: Indira Donnellier
+
+Forensics 2019 project
+"""
+
 import turtle as tu
 import sys
 import lief
@@ -17,8 +27,7 @@ def check_arguments(args):
     elif check_rgb(args.start_color):
         start_color = eval(args.start_color)
     else:
-        sys.exit("\033[1;91mInvalid start color : %s \033[00m" %
-                 args.start_color)
+        sys.exit("\033[1;91mInvalid start color : %s \033[00m" % args.start_color)
 
     if check_hex(args.end_color):
         end_color = hex_to_rgb(args.end_color)
@@ -28,15 +37,15 @@ def check_arguments(args):
         sys.exit("\033[1;91mInvalid end color : %s \033[00m" % args.end_color)
 
     if not check_omit(args.omit):
-        sys.exit(
-            "\033[1;91mInvalid list of values to ommit : %s \033[00m" % str(args.omit))
+        sys.exit("\033[1;91mInvalid list of values to ommit : %s \033[00m" % str(args.omit))
 
     try:
         binary = lief.parse(args.file)
         list_long = binary.get_section(".text").content
     except:
-        sys.exit("\033[1;91mInvalid ELF/PE file : %s \033[00m" %
-                 str(args.file))
+        sys.exit("\033[1;91mInvalid ELF/PE file : %s \033[00m" % str(args.file))
+
+    args.limit = check_limit(2*len(list_long), args.limit)
 
     return binary, list_long, start_color, end_color
 
@@ -49,6 +58,15 @@ def hex_to_rgb(value):
 
 def check_hex(value):
     return re.search(r'^#(?:[0-9a-fA-F]{3}){1,2}$', value)
+
+def check_limit(n, value):
+    try:
+        val = int(value)
+        if val > n:
+            val = 0
+        return val
+    except:
+        sys.exit("\033[1;91mInvalid values for limit : %s \033[00m" % str(args.limit))
 
 
 def check_rgb(value):
@@ -108,14 +126,21 @@ def draw(args, list_long, start_color, end_color):
 
     list_bin = []
 
+    j = 0
     for long in list_long:
         binary = bin(long)[2:].zfill(8)
         bin_left = binary[:4]
         bin_right = binary[4:]
+        if j>args.limit and args.limit!=0:
+            break
         if bin_left not in to_ommit:
             list_bin.append(bin_left)
+            j += 1
+        if j>args.limit and args.limit!=0:
+            break
         if bin_right not in to_ommit:
             list_bin.append(bin_right)
+            j += 1
 
     n = len(list_bin)
 
@@ -151,7 +176,6 @@ def draw(args, list_long, start_color, end_color):
         turtle.forward(0.05)
 
         j = j+1
-
         if not args.silent:
             sys.stdout.write('\033[1;32;1m \rProgress : ' +
                              str(round(float(j)/n*100, 2)) + "%\033[00m")
@@ -171,21 +195,15 @@ def print_debug(binary, args, list_long):
  |______/_/ \_\______|   \/   |_____/_____|\____/
 \033[00m''')
 
-    print(
-        "\033[1;96m **** Loaded file :\033[00m \033[93m{}\033[00m" .format(args.file))
-    print(
-        "\033[1;96m **** File type :\033[00m \033[93m{}\033[00m" .format(binary.format))
-    print("\033[1;96m **** Total file size (bytes) :\033[00m \033[93m{}\033[00m" .format(
-        os.path.getsize(args.file)))
+    print("\033[1;96m **** Loaded file :\033[00m \033[93m{}\033[00m" .format(args.file))
+    print("\033[1;96m **** File type :\033[00m \033[93m{}\033[00m" .format(binary.format))
+    print("\033[1;96m **** Total file size (bytes) :\033[00m \033[93m{}\033[00m" .format(os.path.getsize(args.file)))
     print("\033[1;96m **** Number of 4-bits sequences in .text section :\033[00m \033[93m{}\033[00m" .format(str(2*len(list_long))))
-    print(
-        "\033[1;96m **** Start color :\033[00m \033[93m{}\033[00m" .format(args.start_color))
-    print(
-        "\033[1;96m **** End color :\033[00m \033[93m{}\033[00m" .format(args.end_color))
-    print("\033[1;96m **** Legend display :\033[00m \033[93m{}\033[00m" .format(
-        str(args.no_legend == False)))
-    print("\033[1;96m **** Values to omit :\033[00m \033[93m{}\033[00m" .format(
-        (str(args.omit) if isinstance(args.omit, list) else "None")))
+    print("\033[1;96m **** Number of 4-bits sequences to display :\033[00m \033[93m{}\033[00m" .format((str(args.limit) if args.limit!=0 else "All")))
+    print("\033[1;96m **** Start color :\033[00m \033[93m{}\033[00m" .format(args.start_color))
+    print("\033[1;96m **** End color :\033[00m \033[93m{}\033[00m" .format(args.end_color))
+    print("\033[1;96m **** Legend display :\033[00m \033[93m{}\033[00m" .format(str(args.no_legend == False)))
+    print("\033[1;96m **** Values to omit :\033[00m \033[93m{}\033[00m" .format((str(args.omit) if isinstance(args.omit, list) else "None")))
     print "\n"
     print("\033[1;91m ---- Starting computation ---- \033[00m \n")
 
@@ -252,6 +270,8 @@ def main():
 
     argparser.add_argument("file", metavar='file',
                            help='Path of the executable')
+    argparser.add_argument("-l", "--limit", default=0,
+                           help="Only display the n first 4-bits sequences of the code section. n = 0 displays all sequences. e.g : -l n ")
     argparser.add_argument("-sc", "--start-color", default='#42b0f4',
                            help="Start color of gradient in HEX or RGB 255-tuple. e.g : '#42b0f4' or '(18,255,156)'")
     argparser.add_argument("-ec", "--end-color", default='#f441e2',
