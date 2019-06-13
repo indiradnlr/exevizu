@@ -11,20 +11,23 @@ This python program displays a graphical representation of the binary code in th
 ![Result](https://i.imgur.com/bpeTkBM.png)
 # Requirements
 
- - Python 2.7
+ - Python 2.7 (with Tkinter installed, normally included in standard distribution)
  - Modules listed in reqs.txt
 
 # Installation
 
-     `enter code here `
+     git clone https://github.com/indiradnlr/exevizu.git
+     cd exevizu/
+     [sudo] pip install -r reqs.txt
 
 # Usage
 
-     `python exevizu.py <path/to/file> [-h] [-sc START_COLOR] [-ec END_COLOR] [-om [OMIT [OMIT ...]]] [-nl] [-s] `
+     python exevizu.py <path/to/file> [-h] [-sc START_COLOR] [-ec END_COLOR] [-om OMIT [OMIT ...]] [-nl] [-s]
+
 
 e.g
 
-     `python exevizu.py pe-file.exe -om 0x0 0xe -sc '#887766' -ec '(46, 112, 201)' `
+     python exevizu.py pe-file.exe -om 0x0 0xe -sc '#887766' -ec '(46, 112, 201)'
 
 ## Arguments
 ### Required

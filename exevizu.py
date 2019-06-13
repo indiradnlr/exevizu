@@ -1,7 +1,7 @@
 import turtle as tu
 import sys
 import lief
-import tkinter as tk
+import Tkinter as tk
 import argparse
 import sys
 import re
